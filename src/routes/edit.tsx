@@ -1,8 +1,18 @@
-import { Form, useLoaderData } from "react-router-dom";
+import { Form, useLoaderData, redirect, useNavigate } from "react-router-dom";
+import type { ActionFunctionArgs } from "react-router-dom";
 import type { Contact } from "../contacts";
+import { updateContact } from "../contacts";
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const updates = Object.fromEntries(formData);
+  await updateContact(params.contactId!, updates);
+  return redirect(`/contacts/${params.contactId}`);
+}
 
 export default function EditContact() {
   const contact = useLoaderData() as Contact;
+  const navigate = useNavigate();
 
   return (
     <Form method="post" id="contact-form">
@@ -44,15 +54,18 @@ export default function EditContact() {
       </label>
       <label>
         <span>Notes</span>
-        <textarea
-          name="notes"
-          defaultValue={contact.notes}
-          rows={6}
-        />
+        <textarea name="notes" defaultValue={contact.notes} rows={6} />
       </label>
       <p>
         <button type="submit">Save</button>
-        <button type="button">Cancel</button>
+        <button
+          type="button"
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          Cancel
+        </button>
       </p>
     </Form>
   );
